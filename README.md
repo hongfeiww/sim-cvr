@@ -1,5 +1,5 @@
 # sim-cvr
-# SIM-lite: Session-based Interest Model for CVR Prediction
+# SIM-lite for CVR Prediction with ESMM
 
 A lightweight re-implementation of **Search-based Interest Model (SIM)** for CVR prediction,
 inspired by industrial-scale ranking systems. This project explores how **long-term user
@@ -19,12 +19,12 @@ At large-scale recommendation platforms, a key challenge is:
 - Model inference must complete in **<30ms**
 - Relevant historical behaviors are **sparse** within the full sequence
 
-SIM solves this by:
+SIM :
 1. **General Search Unit (GSU):** Fast top-K retrieval from long sequence using category matching or inner product
 2. **Exact Search Unit (ESU):** Deep attention over the retrieved K items only
 
-This repo implements SIM-lite on public datasets with full experiment tracking, error analysis, and profiling.
 
 ---
 
-inspired by industrial recommender systems.
+
+Dataset: [Ali-CCP](https://tianchi.aliyun.com/dataset/408) (Alibaba, IJCAI-18).
