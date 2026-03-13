@@ -1,7 +1,7 @@
-# sim-ctr
-# SIM-lite: Session-based Interest Model for CTR Prediction
+# sim-cvr
+# SIM-lite: Session-based Interest Model for CVR Prediction
 
-A lightweight re-implementation of **Search-based Interest Model (SIM)** for CTR prediction,
+A lightweight re-implementation of **Search-based Interest Model (SIM)** for CVR prediction,
 inspired by industrial-scale ranking systems. This project explores how **long-term user
 behavior sequences** can be efficiently modeled under strict latency constraints.
 
