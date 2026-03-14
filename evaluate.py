@@ -42,7 +42,7 @@ def run_inference(model, loader, device):
 
 
 def evaluate(args):
-    set_seed(42)
+    set_seed(38)
     ckpt_dir = os.path.dirname(os.path.abspath(args.checkpoint))
 
     with open(os.path.join(ckpt_dir, 'config.json')) as f:

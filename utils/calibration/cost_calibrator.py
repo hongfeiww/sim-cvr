@@ -65,10 +65,10 @@ class CostCalibrator:
             'calibrated_ece':  self._ece(cal, labels),
         }
         logger.info(
-            f'pCVR calibration: raw={self.fit_stats['mean_raw']:.5f} → '
-            f'calibrated={self.fit_stats['mean_calibrated']:.5f} | '
-            f'actual={self.fit_stats['mean_actual']:.5f} | '
-            f'ECE: {self.fit_stats['raw_ece']:.5f} → {self.fit_stats['calibrated_ece']:.5f}'
+            f"pCVR calibration: raw={self.fit_stats['mean_raw']:.5f} → "
+            f"calibrated={self.fit_stats['mean_calibrated']:.5f} | "
+            f"actual={self.fit_stats['mean_actual']:.5f} | "
+            f"ECE: {self.fit_stats['raw_ece']:.5f} → {self.fit_stats['calibrated_ece']:.5f}"
         )
         return self
 
@@ -182,10 +182,10 @@ class CostMonitor:
     def _log(self, r: Dict) -> None:
         icon = {'healthy': '✓', 'overdelivery': '↑', 'underdelivery': '⚠'}[r['status']]
         logger.info(
-            f'[CostMonitor] {icon} ratio={r['global_cost_ratio']:.3f} | '
-            f'pCVR={r['mean_predicted_cvr']:.5f} | '
-            f'realCVR={r['mean_realized_cvr']:.5f} | '
-            f'status={r['status']}'
+            f"[CostMonitor] {icon} ratio={r['global_cost_ratio']:.3f} | "
+            f"pCVR={r['mean_predicted_cvr']:.5f} | "
+            f"realCVR={r['mean_realized_cvr']:.5f} | "
+            f"status={r['status']}"
         )
         if r['status'] == 'underdelivery':
             logger.warning(

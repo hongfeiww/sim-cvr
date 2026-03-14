@@ -86,9 +86,9 @@ def chronological_split(df, train_r=0.7, val_r=0.1):
     train, val, test = df.iloc[:t1].copy(), df.iloc[t1:t2].copy(), df.iloc[t2:].copy()
     for name, split in [('Train', train), ('Val', val), ('Test', test)]:
         logger.info(
-            f'  {name}: {len(split):,} | '
-            f'CTR={split['click'].mean():.4f} | '
-            f'CTCVR={split['purchase'].mean():.4f}'
+            f"  {name}: {len(split):,} | "
+            f"CTR={split['click'].mean():.4f} | "
+            f"CTCVR={split['purchase'].mean():.4f}"
         )
     return train, val, test
 
@@ -105,7 +105,7 @@ def preprocess(data_dir, output_dir, max_seq_len=50, min_count=5, subsample=1.0,
     raw_path = os.path.join(data_dir, 'sample_skeleton_train.csv')
     if not os.path.exists(raw_path):
         raise FileNotFoundError(
-            f'Ali-CCP not found at {raw_path}.'
+            f'Ali-CCP not found at {raw_path}.\n'
             'Download from https://tianchi.aliyun.com/dataset/408\n'
         )
 
