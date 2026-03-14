@@ -42,6 +42,8 @@ def parse_args():
     p.add_argument('--batch_size',  type=int,   default=4096)
     p.add_argument('--num_workers', type=int,   default=4)
     p.add_argument('--subset',      type=float, default=None)
+    p.add_argument("--streaming",   action="store_true",
+                   help="Stream parquet row-by-row (O(batch) RAM, use for large datasets)")
     # Model
     p.add_argument('--embed_dim',   type=int,         default=32)
     p.add_argument('--hidden_dims', type=int, nargs='+', default=[256, 128, 64])
@@ -81,6 +83,7 @@ def main():
         max_seq_len=args.seq_len,
         num_workers=args.num_workers,
         subset=args.subset,
+        streaming=getattr(args, "streaming", False),
     )
     logger.info(f'Train batches: {len(train_loader)} | '
                 f'Val: {len(val_loader)} | Test: {len(test_loader)}')
