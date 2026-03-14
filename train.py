@@ -87,7 +87,7 @@ def main():
 
     # model
     model = ESMM(
-        vocab_sizes=vocab_sizes,
+        vocab_sizes=vocab_sizes['vocab_sizes'],
         embed_dim=args.embed_dim,
         hidden_dims=args.hidden_dims,
         dropout=args.dropout,

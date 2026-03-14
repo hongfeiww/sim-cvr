@@ -21,7 +21,7 @@ import mlflow
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -86,7 +86,7 @@ class ESMMTrainer:
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             self.optimizer, T_max=30, eta_min=lr * 0.01
         )
-        self.scaler = GradScaler('cuda', enabled=self.use_amp)
+        self.scaler = GradScaler('cuda', enabled=self.use_amp and torch.cuda.is_available())
         # Monitor AUC_CVR (primary business metric)
         self.early_stop = EarlyStopping(patience=patience, mode="max")
 
@@ -96,13 +96,13 @@ class ESMMTrainer:
         n = 0
 
         for batch in tqdm(self.train_loader, desc="  train", leave=False):
-            batch   = {k: v.to(self.device) for k, v in batch.items()}
-            click   = batch.pop("click")
+            batch = {k: v.to(self.device) for k, v in batch.items()}
+            click = batch.pop("click")
             purchase= batch.pop("purchase")
 
             self.optimizer.zero_grad(set_to_none=True)
 
-            with autocast('cuda', enabled=self.use_amp):
+            with autocast("cuda" if self.device == "cuda" else "cpu", enabled=self.use_amp):
                 p_ctr, p_cvr, p_ctcvr = self.model(batch)
                 loss, l_ctr, l_ctcvr  = self.model.compute_loss(
                     p_ctr, p_ctcvr, click, purchase
@@ -133,7 +133,7 @@ class ESMMTrainer:
             click    = batch.pop("click").cpu().numpy()
             purchase = batch.pop("purchase").cpu().numpy()
 
-            with autocast(enabled=self.use_amp):
+            with autocast('cuda', enabled=self.use_amp):
                 p_ctr, p_cvr, p_ctcvr = self.model(batch)
 
             all_p_ctr.append(p_ctr.cpu().numpy())

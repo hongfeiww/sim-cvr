@@ -97,12 +97,11 @@ def build_dataloaders(
     num_workers: int = 4,
     subset: Optional[float] = None,
 ) -> Tuple[DataLoader, DataLoader, DataLoader, Dict]:
-    '''Returns (train_loader, val_loader, test_loader, meta_dict).'''
     train_ds = CVRDataset(os.path.join(data_dir,'train.parquet'), max_seq_len, subset)
     val_ds   = CVRDataset(os.path.join(data_dir,'val.parquet'),   max_seq_len)
     test_ds  = CVRDataset(os.path.join(data_dir,'test.parquet'),  max_seq_len)
 
-    kw = dict(num_workers=num_workers, pin_memory=True)
+    kw = dict(num_workers=num_workers, pin_memory=False)
     train_loader = DataLoader(train_ds, batch_size=batch_size,     shuffle=True,  **kw)
     val_loader   = DataLoader(val_ds,   batch_size=batch_size * 2, shuffle=False, **kw)
     test_loader  = DataLoader(test_ds,  batch_size=batch_size * 2, shuffle=False, **kw)

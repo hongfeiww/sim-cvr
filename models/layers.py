@@ -42,14 +42,14 @@ class EmbeddingTable(nn.Module):
                  padding_idx: int = 0):
         super().__init__()
         self.embed_dim = embed_dim
-        # Guard: only keep entries with valid positive-int sizes
-        valid = {k: int(v) for k, v in vocab_sizes.items()
-                 if isinstance(v, (int, float)) and v is not None and int(v) > 0}
+        
         self.embeddings = nn.ModuleDict({
-            name: nn.Embedding(size, embed_dim, padding_idx=padding_idx)
-            for name, size in valid.items()
+            name: nn.Embedding(int(size), embed_dim, padding_idx=padding_idx)
+            for name, size in vocab_sizes.items()
         })
-        self._init_weights()
+        for emb in self.embeddings.values():
+            nn.init.normal_(emb.weight, mean=0.0, std=0.01)
+            nn.init.zeros_(emb.weight[0])
  
     def _init_weights(self):
         for emb in self.embeddings.values():

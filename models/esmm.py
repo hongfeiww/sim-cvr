@@ -20,6 +20,7 @@ from typing import Dict, List, Tuple
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from .layers import EmbeddingTable, MLP
 from .sim_cvr import SIMCVRTower, ALL_FIELDS
@@ -78,9 +79,24 @@ class ESMM(nn.Module):
             self.ctr_tower = nn.Linear(num_fields * embed_dim, 1)
 
     def _scalar_embs(self, batch: Dict[str, torch.Tensor]) -> List[torch.Tensor]:
-        feat = {f: batch[f] for f in ALL_FIELDS if f in batch}
+  
+        # Check batch keys
+        missing_batch = [f for f in ALL_FIELDS if f not in batch]
+        if missing_batch:
+            raise KeyError(f"Features missing from batch: {missing_batch}")
+ 
+        feat     = {f: batch[f] for f in ALL_FIELDS}
         emb_dict = self.shared_emb(feat)
-        return [emb_dict[f] for f in ALL_FIELDS if f in emb_dict]
+ 
+        # Check embedding table keys
+        missing_emb = [f for f in ALL_FIELDS if f not in emb_dict]
+        if missing_emb:
+            raise KeyError(
+                f"Features not in EmbeddingTable: {missing_emb}\n"
+                f"EmbeddingTable has: {sorted(self.shared_emb.embeddings.keys())}"
+            )
+ 
+        return [emb_dict[f] for f in ALL_FIELDS]
 
     def forward(
         self,
@@ -121,7 +137,22 @@ class ESMM(nn.Module):
         p_ctcvr = p_ctr * p_cvr # [B]
 
         return p_ctr, p_cvr, p_ctcvr
-
+    
+    def compute_loss(
+        self,
+        p_ctr:    torch.Tensor,   # [B]
+        p_ctcvr:  torch.Tensor,   # [B]
+        click:    torch.Tensor,   # [B]
+        purchase: torch.Tensor,   # [B]
+        eps:      float = 1e-7,
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        p_ctr   = p_ctr.clamp(eps, 1 - eps)
+        p_ctcvr = p_ctcvr.clamp(eps, 1 - eps)
+        l_ctr   = F.binary_cross_entropy(p_ctr, click, reduction="mean")
+        l_ctcvr = F.binary_cross_entropy(p_ctcvr, purchase, reduction="mean")
+        l_total = self.ctr_weight * l_ctr + self.ctcvr_weight * l_ctcvr
+        return l_total, l_ctr, l_ctcvr
+    
     def predict_ecpm(
         self,
         batch: Dict[str, torch.Tensor],
