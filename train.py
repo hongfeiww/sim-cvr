@@ -85,8 +85,13 @@ def main():
         subset=args.subset,
         streaming=getattr(args, "streaming", False),
     )
-    logger.info(f'Train batches: {len(train_loader)} | '
-                f'Val: {len(val_loader)} | Test: {len(test_loader)}')
+    def _loader_len(loader):
+        try:
+            return len(loader)
+        except TypeError:
+            return "?"
+    logger.info(f"Train batches: {_loader_len(train_loader)} | "
+                f"Val: {_loader_len(val_loader)} | Test: {_loader_len(test_loader)}")
 
     # model
     model = ESMM(

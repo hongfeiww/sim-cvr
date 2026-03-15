@@ -86,7 +86,8 @@ class ESMMTrainer:
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             self.optimizer, T_max=30, eta_min=lr * 0.01
         )
-        self.scaler = GradScaler('cuda', enabled=self.use_amp and torch.cuda.is_available())
+        _scaler_device = 'cuda' if device == 'cuda' and torch.cuda.is_available() else 'cpu'
+        self.scaler = GradScaler(_scaler_device, enabled=self.use_amp and device == 'cuda')
         # Monitor AUC_CVR (primary business metric)
         self.early_stop = EarlyStopping(patience=patience, mode="max")
 

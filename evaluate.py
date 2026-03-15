@@ -42,7 +42,7 @@ def run_inference(model, loader, device):
 
 
 def evaluate(args):
-    set_seed(38)
+    set_seed(42)
     ckpt_dir = os.path.dirname(os.path.abspath(args.checkpoint))
 
     with open(os.path.join(ckpt_dir, 'config.json')) as f:
@@ -100,7 +100,7 @@ def evaluate(args):
 
     # Cost monitor report
     monitor = CostMonitor()
-    monitor.compute(p_cvr=preds['p_cvr'], purchase=preds['purchase'], bid=bid)
+    monitor.compute(p_cvr=preds['p_ctcvr'], purchase=preds['purchase'], bid=bid)
 
     suffix = '_calibrated' if args.calibrate else ''
     logger.info(f'\n{'='*55}')

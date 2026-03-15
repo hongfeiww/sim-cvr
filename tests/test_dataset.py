@@ -10,7 +10,7 @@ import torch
 
 
 def make_parquet(tmp_path, n=200, seq_len=10) -> str:
-    rng = np.random.default_rng(38)
+    rng = np.random.default_rng(42)
     records = []
     for i in range(n):
         sl = int(rng.integers(0, seq_len))
