@@ -66,17 +66,17 @@ def compute_esmm_metrics(
     # Cost ratio: realized_CVR / predicted_CVR
     # Using uniform bid=1 for ratio (bid cancels out in ratio)
     if bid is not None:
-        expected_spend = (p_cvr   * bid).sum()
+        expected_spend = (p_ctcvr * bid).sum()
         actual_spend   = (purchase * bid).sum()
     else:
-        expected_spend = p_cvr.sum()
+        expected_spend = p_ctcvr.sum()
         actual_spend   = purchase.sum()
 
     cost_ratio = float(actual_spend / (expected_spend + 1e-12))
     metrics['cost_ratio'] = cost_ratio
     metrics['cost_status'] = (
-        'overdelivery'  if cost_ratio > 1.02 else
-        'underdelivery' if cost_ratio < 0.98 else
+        'overdelivery'  if cost_ratio > 1.2 else
+        'underdelivery' if cost_ratio < 0.8 else
         'healthy'
     )
 
@@ -96,4 +96,4 @@ def compute_gauc(
             continue
         auc_sum    += roc_auc_score(y_true[m], y_score[m]) * m.sum()
         weight_sum += m.sum()
-    return float(auc_sum / weight_sum) if weight_sum > 0 else float('nan')
+    return float(auc_sum / weight_sum) if weight_sum > 0 else float("nan")

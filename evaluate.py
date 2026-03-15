@@ -100,7 +100,7 @@ def evaluate(args):
 
     # Cost monitor report
     monitor = CostMonitor()
-    monitor.compute(p_cvr=preds['p_cvr'], purchase=preds['purchase'], bid=bid)
+    monitor.compute(p_cvr=preds['p_ctcvr'], purchase=preds['purchase'], bid=bid)
 
     suffix = '_calibrated' if args.calibrate else ''
     logger.info(f'\n{'='*55}')

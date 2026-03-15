@@ -10,7 +10,7 @@ import torch
 
 
 def make_parquet(tmp_path, n=200, seq_len=10) -> str:
-    rng = np.random.default_rng(38)
+    rng = np.random.default_rng(42)
     records = []
     for i in range(n):
         sl = int(rng.integers(0, seq_len))
@@ -59,7 +59,7 @@ class TestCVRDataset:
         path = make_parquet(tmp_path, n=50, seq_len=L)
         ds   = CVRDataset(path, max_seq_len=L)
         s    = ds[0]
-        assert s['seq_item_ids'].shape   == (L,), f'seq shape wrong: {s['seq_item_ids'].shape}'
+        assert s['seq_item_ids'].shape   == (L,), f"seq shape wrong: {s['seq_item_ids'].shape}"
         assert s['seq_categories'].shape == (L,)
         assert s['seq_mask'].shape       == (L,)
         assert s['click'].ndim           == 0, 'click must be scalar'

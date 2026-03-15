@@ -1,16 +1,13 @@
 '''
 Ad Cost Calibration for ad Bidding.
-
-Business context:
-
 Advertisers set a target CPA (cost-per-acquisition = cost per conversion).
 The platform ranks ads by eCPM and charges per impression:
 
     eCPM      = bid × pCTR × pCVR × 1000
-    expected  = bid × pCVR           (what advertiser expects to pay per impression)
-    actual    = bid × realized_CVR   (what platform actually charges)
+    expected  = bid × pCTCVR          (what advertiser expects to pay per impression)
+    actual    = bid × realized_CTCVR  (what platform actually charges)
 
-    cost_ratio = actual / expected = realized_CVR / mean_pCVR
+    cost_ratio = actual / expected = realized_CTCVR / mean_pCTCVR
 
 Ideal state  : cost_ratio ≈ 1.0  (1:1)
 Over-delivery: cost_ratio > 1.2  → pCVR under-estimated → underspend
@@ -65,10 +62,10 @@ class CostCalibrator:
             'calibrated_ece':  self._ece(cal, labels),
         }
         logger.info(
-            f'pCVR calibration: raw={self.fit_stats['mean_raw']:.5f} → '
-            f'calibrated={self.fit_stats['mean_calibrated']:.5f} | '
-            f'actual={self.fit_stats['mean_actual']:.5f} | '
-            f'ECE: {self.fit_stats['raw_ece']:.5f} → {self.fit_stats['calibrated_ece']:.5f}'
+            f"pCVR calibration: raw={self.fit_stats['mean_raw']:.5f} → "
+            f"calibrated={self.fit_stats['mean_calibrated']:.5f} | "
+            f"actual={self.fit_stats['mean_actual']:.5f} | "
+            f"ECE: {self.fit_stats['raw_ece']:.5f} → {self.fit_stats['calibrated_ece']:.5f}"
         )
         return self
 
@@ -124,15 +121,15 @@ class CostMonitor:
 
     def compute(
         self,
-        p_cvr: np.ndarray, # [N] predicted CVR
+        p_ctcvr: np.ndarray, # [N] predicted CVR
         purchase: np.ndarray, # [N] actual purchase label
         bid: Optional[np.ndarray] = None, # [N] per-sample CPA bid
         group_ids: Optional[np.ndarray] = None, # [N] customer_id
     ) -> Dict:
         if bid is None:
-            bid = np.ones(len(p_cvr), dtype=np.float32)
+            bid = np.ones(len(p_ctcvr), dtype=np.float32)
 
-        expected_spend = (p_cvr   * bid).sum()
+        expected_spend = (p_ctcvr * bid).sum()
         actual_spend   = (purchase * bid).sum()
         ratio = float(actual_spend / (expected_spend + 1e-12))
 
@@ -146,7 +143,7 @@ class CostMonitor:
             'global_cost_ratio':   ratio,
             'expected_spend':      float(expected_spend),
             'actual_spend':        float(actual_spend),
-            'mean_predicted_cvr':  float(p_cvr.mean()),
+            'mean_predicted_cvr':  float(p_ctcvr.mean()),
             'mean_realized_cvr':   float(purchase.mean()),
             'status':              status,
         }
@@ -157,7 +154,7 @@ class CostMonitor:
                 m = group_ids == gid
                 if m.sum() < 10:
                     continue
-                g_exp = (p_cvr[m] * bid[m]).sum()
+                g_exp = (p_ctcvr[m] * bid[m]).sum()
                 g_act = (purchase[m] * bid[m]).sum()
                 g_ratio = float(g_act / (g_exp + 1e-12))
                 per_group[int(gid)] = {
@@ -182,10 +179,10 @@ class CostMonitor:
     def _log(self, r: Dict) -> None:
         icon = {'healthy': '✓', 'overdelivery': '↑', 'underdelivery': '⚠'}[r['status']]
         logger.info(
-            f'[CostMonitor] {icon} ratio={r['global_cost_ratio']:.3f} | '
-            f'pCVR={r['mean_predicted_cvr']:.5f} | '
-            f'realCVR={r['mean_realized_cvr']:.5f} | '
-            f'status={r['status']}'
+            f"[CostMonitor] {icon} ratio={r['global_cost_ratio']:.3f} | "
+            f"pCVR={r['mean_predicted_cvr']:.5f} | "
+            f"realCVR={r['mean_realized_cvr']:.5f} | "
+            f"status={r['status']}"
         )
         if r['status'] == 'underdelivery':
             logger.warning(

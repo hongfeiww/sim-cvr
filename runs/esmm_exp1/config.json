@@ -1,0 +1,29 @@
+{
+  "data_dir": "data/processed",
+  "seq_len": 50,
+  "batch_size": 4096,
+  "num_workers": 4,
+  "subset": null,
+  "streaming": true,
+  "embed_dim": 32,
+  "hidden_dims": [
+    256,
+    128,
+    64
+  ],
+  "dropout": 0.3,
+  "top_k": 20,
+  "gsu_mode": "hard",
+  "no_ctr_tower": false,
+  "ctr_loss_weight": 1.0,
+  "target_cpa": 50.0,
+  "epochs": 30,
+  "lr": 0.001,
+  "weight_decay": 1e-06,
+  "patience": 3,
+  "use_amp": false,
+  "no_cuda": false,
+  "seed": 42,
+  "log_dir": "runs/esmm_exp1",
+  "use_ctr_tower": true
+}
