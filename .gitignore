@@ -1,2 +1,11 @@
 */.DS_Store
 .DS_Store
+*.csv
+__pycache__
+*.db
+mlruns/
+configs/
+*.parquet
+data/processed*/
+*/__init__.py
+debug*

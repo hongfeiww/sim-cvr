@@ -39,7 +39,7 @@ def parse_args():
     # Data
     p.add_argument('--data_dir',    default='data/processed')
     p.add_argument('--seq_len',     type=int,   default=50)
-    p.add_argument('--batch_size',  type=int,   default=4096)
+    p.add_argument('--batch_size',  type=int,   default=2048)
     p.add_argument('--num_workers', type=int,   default=4)
     p.add_argument('--subset',      type=float, default=None)
     p.add_argument("--streaming",   action="store_true",

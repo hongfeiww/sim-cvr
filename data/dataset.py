@@ -77,20 +77,7 @@ class CVRDataset(Dataset):
                  subset: Optional[float] = None):
         self.max_seq_len = max_seq_len
 
-        # Load only needed columns -- avoids loading unused metadata columns
-        existing = pd.read_parquet(parquet_path, columns=["user_id"]).columns
-        cols_to_load = [c for c in LOAD_COLS
-                        if c in pd.read_parquet(
-                            parquet_path, columns=LOAD_COLS[:1]).columns
-                        or True]  # read all, pandas ignores missing
-        try:
-            self.df = pd.read_parquet(parquet_path, columns=LOAD_COLS)
-        except Exception:
-            # Fallback: load all and keep only what we need
-            self.df = pd.read_parquet(parquet_path)
-            for col in SCALAR_COLS + LABEL_COLS:
-                if col not in self.df.columns:
-                    self.df[col] = 1
+        self.df = pd.read_parquet(parquet_path)
 
         if subset is not None:
             n = max(1, int(len(self.df) * subset))
@@ -100,10 +87,10 @@ class CVRDataset(Dataset):
         for col in SCALAR_COLS:
             if col not in self.df.columns:
                 self.df[col] = 1
+            else:
+                self.df[col] = (pd.to_numeric(self.df[col], errors="coerce")
+                                .fillna(1).clip(lower=1).astype("int32"))
 
-        # Convert scalar cols to int16/int32 to save RAM
-        for col in SCALAR_COLS:
-            self.df[col] = self.df[col].astype("int32")
         for col in LABEL_COLS:
             if col in self.df.columns:
                 self.df[col] = self.df[col].astype("float32")
@@ -161,6 +148,14 @@ class IterableParquetDataset(IterableDataset):
         self._has_seq = ("seq_items" in schema_cols and
                          "seq_cats"  in schema_cols)
 
+    def __len__(self) -> int:
+        # Approximate length for DataLoader progress display.
+        try:
+            import pyarrow.parquet as pq
+            return pq.read_metadata(self.parquet_path).num_rows
+        except Exception:
+            return 0
+
     def _iter_row_groups(self) -> Iterator[pd.DataFrame]:
         import pyarrow.parquet as pq
         pf = pq.ParquetFile(self.parquet_path)
@@ -211,7 +206,7 @@ def _estimate_parquet_rows(path: str) -> int:
 
 def build_dataloaders(
     data_dir:    str,
-    batch_size:  int            = 4096,
+    batch_size:  int            = 2048,
     max_seq_len: int            = 50,
     num_workers: int            = 0,      # 0 = main process (safer for IterableDataset)
     subset:      Optional[float] = None,
